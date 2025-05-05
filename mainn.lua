@@ -1,3 +1,14 @@
+local success = pcall(function()
+    local testFunc = function() return "original" end
+    local hooked = hookfunction(testFunc, function() return "hooked" end)
+    assert(testFunc() == "hooked")
+end)
+
+if not success then 
+return error('hookfunction is not supported.') 
+end
+
+
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -50,7 +61,7 @@ Tabs.Status:AddParagraph({
 })
 Tabs.Status:AddParagraph({
     Title = "Script Version",
-    Content = "0.2.0"
+    Content = "0.2.1"
 })
 Tabs.Status:AddParagraph({
     Title = "Executor",
@@ -486,22 +497,30 @@ Tabs.Main:AddToggle("BoxHandleToggle", {
 })
 
 
-Tabs.Main:AddSlider("BoxHandleSizeSlider", {
-    Title = "TPS Box Handle Size",
-    Description = "Adjust the size of TPS BoxHandleAdornments",
+local function updateBoxHandleSize(value)
+	for _, ball in pairs(Workspace:GetDescendants()) do
+		if ball:IsA("Part") and ball.Name == "TPS" then
+			ball.Size = Vector3.new(value, value, value)
+			local boxHandle = ball:FindFirstChild("TPSBoxHandle")
+			if boxHandle and boxHandle:IsA("BoxHandleAdornment") then
+				boxHandle.Size = ball.Size
+			end
+		end
+	end
+end
+
+Tabs.Main:AddSlider("BoxHandleSizeSliderOnly", {
+    Title = "Ball Hitbox",
+    Description = "Resize the ball hitbox",
     Default = 1,
     Min = 0.5,
     Max = 5,
     Rounding = 2,
     Callback = function(value)
-        for _, boxHandle in pairs(boxHandles) do
-            if boxHandle then
-                boxHandle.Size = Vector3.new(value, value, value)
-            end
-        end
+        updateBoxHandleSize(value)
         Fluent:Notify({
-            Title = "Box Handle Size",
-            Content = "Size set to: " .. value,
+            Title = "Size Updated",
+            Content = "Ball and BoxHandle size: " .. value,
             Duration = 3
         })
     end
@@ -652,9 +671,15 @@ end)
 
 
 function cleanup()
+
     ballESP:Remove()
     tracerESP:Remove()
     distanceLabel:Remove()
+    Fluent:Notify({
+        Title = "Error",
+        Content = "The script was closed, please report this error to the developer. Code error: 161218 (PLAYER UNLOADED)",
+        Duration = 5
+    })
     if reachCircle then
         reachCircle:Destroy()
     end
