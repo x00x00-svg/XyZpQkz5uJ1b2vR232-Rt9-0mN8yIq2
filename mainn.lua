@@ -510,7 +510,7 @@ Tabs.fun:AddSlider("BoxHandleSizeSlider", {
     Title = "Changed cooldown of dribble",
     Description = "Adjust cooldown of dribble",
     Default = 1,
-    Min = 0.5,
+    Min = 0,
     Max = 10,
     Rounding = 2,
     Callback = function(value)
