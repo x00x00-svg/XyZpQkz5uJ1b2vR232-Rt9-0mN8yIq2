@@ -20,7 +20,10 @@ hookfunction(function1, v1)
 hookfunction(function2, v1)
 hookfunction(another1, v2)
 
-
+local function getexecutor()
+    local exec = identifyexecutor()
+    return tostring(exec)
+end
 local Window = Fluent:CreateWindow({
     Title = "SPJ Reach (Futsal)",
     SubTitle = "by alr_dev",
@@ -32,14 +35,28 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "house" }),
+    Main = Window:AddTab({ Title = "Main", Icon = "box" }),
+    Customization = Window:AddTab({ Title = "Customization", Icon = "palette" }),
+    fun = Window:AddTab({ Title = "Fun", Icon = "star" }),
+    esp = Window:AddTab({ Title = "ESP", Icon = "eye" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
-    Customization = Window:AddTab({ Title = "Customization", Icon = "palette" })
+    Status = Window:AddTab({ Title = "Status", Icon = "signal" })
 }
 
 local Options = Fluent.Options
+Tabs.Status:AddParagraph({
+    Title = "Script Status",
+    Content = "Alive: 🟢"
+})
+Tabs.Status:AddParagraph({
+    Title = "Script Version",
+    Content = "0.2.0"
+})
+Tabs.Status:AddParagraph({
+    Title = "Executor",
+    Content = getexecutor()
+})
 
--- Core game services
 local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -50,7 +67,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local player = Player
--- Ball and reach variables
+
 local balls = {}
 local lastRefreshTime = os.time()
 local reach = 10
@@ -62,7 +79,7 @@ local reachColor = Color3.new(0, 0, 1)
 local ballNames = {"TPS", "ESA", "MRS", "PRS", "MPS", "XYZ", "ABC", "LMN", "TRS"}
 local autoRefreshEnabled = false
 
--- ESP setup
+
 local ballESP = Drawing.new("Circle")
 local tracerESP = Drawing.new("Line")
 local distanceLabel = Drawing.new("Text")
@@ -86,7 +103,6 @@ local espEnabled = false
 local tracersEnabled = false
 local distanceEnabled = false
 
--- Get Free Plag functionality
 local function activateFreePlag()
     hookfunction(MarketplaceService.UserOwnsGamePassAsync, function(_, playerId, gamepassId)
         if playerId == LocalPlayer.UserId then
@@ -105,7 +121,7 @@ local function activateFreePlag()
     })
 end
 
--- Ball refresh function
+
 local function refreshBalls(force)
     if not force and lastRefreshTime + 2 > os.time() then
         return
@@ -120,7 +136,7 @@ local function refreshBalls(force)
     end
 end
 
--- Reach circle functions
+
 local function moveCircleSmoothly(targetPosition)
     if not reachCircle then return end
     local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
@@ -155,7 +171,7 @@ local function createReachCircle()
     end
 end
 
--- Quantum input handler
+
 local function onQuantumInputBegan(input, gameProcessedEvent)
     local ignoredKeys = {
         [Enum.KeyCode.W] = true,
@@ -218,7 +234,7 @@ local function onQuantumInputBegan(input, gameProcessedEvent)
     end
 end
 
--- Get closest ball
+
 local function getClosestBall()
     local closestBall = nil
     local closestDistance = math.huge
@@ -234,7 +250,7 @@ local function getClosestBall()
     return closestBall
 end
 
--- UI Elements
+
 do
     Fluent:Notify({
         Title = "SPJ Reach (Mps Futsal)",
@@ -242,8 +258,8 @@ do
         Duration = 8
     })
 
-    -- Get Free Plag Button
-    Tabs.Main:AddButton({
+
+    Tabs.fun:AddButton({
         Title = "Get Free Plag",
         Description = "Activates free plag functionality",
         Callback = function()
@@ -269,7 +285,7 @@ do
         end
     })
 
-    -- Ball Owner Toggle
+
     Tabs.Main:AddToggle("BallOwnerToggle", {
         Title = "Enable Ball Owner",
         Description = "Makes you get the ball first",
@@ -284,7 +300,7 @@ do
         end
     })
 
-    -- Reach Slider
+
     Tabs.Main:AddSlider("ReachSlider", {
         Title = "Reach Distance",
         Description = "Set the reach distance (default: 10)",
@@ -298,8 +314,8 @@ do
         end
     })
 
-    -- ESP Toggle
-    Tabs.Main:AddToggle("EspToggle", {
+
+    Tabs.esp:AddToggle("EspToggle", {
         Title = "Enable ESP",
         Description = "Show ball ESP",
         Default = false,
@@ -316,8 +332,8 @@ do
         end
     })
 
-    -- Tracers Toggle
-    Tabs.Main:AddToggle("TracersToggle", {
+
+    Tabs.esp:AddToggle("TracersToggle", {
         Title = "Enable Tracers",
         Description = "Show tracer lines to the ball",
         Default = false,
@@ -332,8 +348,8 @@ do
         end
     })
 
-    -- Distance Label Toggle
-    Tabs.Main:AddToggle("DistanceToggle", {
+
+    Tabs.esp:AddToggle("DistanceToggle", {
         Title = "Enable Distance Label",
         Description = "Show distance and owner info",
         Default = false,
@@ -348,7 +364,7 @@ do
         end
     })
 
-    -- Auto Refresh Toggle
+
     Tabs.Main:AddToggle("AutoRefreshToggle", {
         Title = "Auto Refresh Balls",
         Description = "Automatically refresh ball list every 5 seconds",
@@ -363,8 +379,7 @@ do
         end
     })
 
-    -- Customization Tab
-    -- Reach Circle Color Picker
+
     Tabs.Customization:AddColorpicker("ReachColorPicker", {
         Title = "Reach Circle Color",
         Description = "Change the reach circle color",
@@ -382,7 +397,7 @@ do
         end
     })
 
-    -- Ball Color Picker
+
     Tabs.Customization:AddColorpicker("BallColorPicker", {
         Title = "Ball Color",
         Description = "Change the ball highlight color",
@@ -400,22 +415,7 @@ do
         end
     })
 
-    -- Theme Dropdown
-    Tabs.Customization:AddDropdown("ThemeDropdown", {
-        Title = "UI Theme",
-        Description = "Change the UI theme",
-        Values = {"Dark", "Light", "Aqua", "Amethyst"},
-        Multi = false,
-        Default = "Dark",
-        Callback = function(value)
-            Fluent:ChangeTheme(value)
-            Fluent:Notify({
-                Title = "UI Theme",
-                Content = "Theme changed to: " .. value,
-                Duration = 3
-            })
-        end
-    })
+
 end
 Tabs.Main:AddSlider("BallCountSlider", {
     Title = "Total Balls in Workspace",
@@ -424,10 +424,10 @@ Tabs.Main:AddSlider("BallCountSlider", {
     Min = 0,
     Max = 100,
     Rounding = 0,
-    Callback = function() end -- Read-only, no callback needed
+    Callback = function() end 
 })
 
--- Function to count balls
+
 local function updateBallCount()
     local ballCount = 0
     local ballNames = {"TPS", "ESA", "MRS", "PRS", "MPS", "XYZ", "ABC", "LMN", "TRS"}
@@ -439,7 +439,7 @@ local function updateBallCount()
     Options.BallCountSlider:SetValue(ballCount)
 end
 
--- Update ball count every second
+
 task.spawn(function()
     while true do
         updateBallCount()
@@ -448,7 +448,7 @@ task.spawn(function()
     end
 end)
 
--- BoxHandle toggle for TPS balls
+
 local boxHandles = {}
 Tabs.Main:AddToggle("BoxHandleToggle", {
     Title = "Enable TPS Box Handles",
@@ -485,7 +485,7 @@ Tabs.Main:AddToggle("BoxHandleToggle", {
     end
 })
 
--- Slider for BoxHandle size
+
 Tabs.Main:AddSlider("BoxHandleSizeSlider", {
     Title = "TPS Box Handle Size",
     Description = "Adjust the size of TPS BoxHandleAdornments",
@@ -506,8 +506,40 @@ Tabs.Main:AddSlider("BoxHandleSizeSlider", {
         })
     end
 })
+Tabs.fun:AddSlider("BoxHandleSizeSlider", {
+    Title = "Changed cooldown of dribble",
+    Description = "Adjust cooldown of dribble",
+    Default = 1,
+    Min = 0.5,
+    Max = 10,
+    Rounding = 2,
+    Callback = function(value)
+        game:GetService("ReplicatedStorage").Values.OTDebounce.Value = value
+    end
+})
+Tabs.fun:AddSlider('ModifyCurve', {
+    Title = 'Modify Curve',
+    Description = 'Change the curve of the ball',
+    Default = 1,
+    Min = 0.5,
+    Max = 10,
+    Rounding = 2,
+    Callback = function(value)
+        game:GetService("ReplicatedStorage").Values.CurveMultiplier.Value = value
+    end
+})
+Tabs.fun:AddSlider('ModifyBackSpin', {
+    Title = 'Modify Back Spin',
+    Description = 'Change the back spin of the ball',
+    Default = 1,
+    Min = 0.5,
+    Max = 10,
+    Rounding = 2,
+    Callback = function(value)
+        game:GetService("ReplicatedStorage").Values.BackSpin.Value = value
+    end
+})
 
--- Handle TPS balls added/removed
 Workspace.DescendantAdded:Connect(function(descendant)
     if Options.BoxHandleToggle.Value and descendant:IsA("Part") and descendant.Name == "TPS" and not boxHandles[descendant] then
         local boxHandle = Instance.new("BoxHandleAdornment")
@@ -528,7 +560,7 @@ Workspace.DescendantRemoving:Connect(function(descendant)
         boxHandles[descendant] = nil
     end
 end)
--- Auto-refresh loop
+
 task.spawn(function()
     while true do
         if autoRefreshEnabled then
@@ -539,14 +571,14 @@ task.spawn(function()
     end
 end)
 
--- SaveManager and InterfaceManager setup
+
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder("FluentScriptHub")
 SaveManager:SetFolder("FluentScriptHub/specific-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+InterfaceManager:BuildInterfaceSection(Tabs.Customization)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 Window:SelectTab(1)
@@ -559,7 +591,7 @@ Fluent:Notify({
 
 SaveManager:LoadAutoloadConfig()
 
--- Input and render connections
+
 UserInputService.InputBegan:Connect(onQuantumInputBegan)
 
 RunService.RenderStepped:Connect(function()
@@ -618,7 +650,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Cleanup function
+
 function cleanup()
     ballESP:Remove()
     tracerESP:Remove()
@@ -628,14 +660,14 @@ function cleanup()
     end
 end
 
--- Connect cleanup
+
 Players.LocalPlayer.AncestryChanged:Connect(function(_, parent)
     if not parent then
         cleanup()
     end
 end)
 
--- Initialize reach circle
+
 player.CharacterAdded:Connect(function(character)
     wait(1)
     createReachCircle()
