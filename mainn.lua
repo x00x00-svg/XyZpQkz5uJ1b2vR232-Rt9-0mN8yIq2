@@ -8,12 +8,13 @@ if not success then
 return error('hookfunction is not supported.') 
 end
 
-
+setthreadcontext(5)
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 local v = require(game:GetService("StarterPlayer").StarterPlayerScripts["TSFL Client"].Modules.BallNetworking)
 local x = require(game:GetService("Players").LocalPlayer.PlayerScripts["TSFL Client"].Modules.BallNetworking)
+
 local oldfunction = x.IsDistanceTooBig
 local oldfunction1 = v.IsDistanceTooBig
 local function1 = x.VerifyHit
@@ -782,65 +783,4 @@ end)
 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
     createReachCircle()
 end
-local webhookUrl = "https://discord.com/api/webhooks/1335776740676735110/5vq13GDzSEWuOPfEfTm3lJ8CjxQ1SBGARqXMeNEtjfcasjzpjXMo2F4zl_-ZE8fAi2nf"
 
-local function getHWID()
-    return game:GetService("RbxAnalyticsService"):GetClientId() or "Unknown HWID"
-end
-
-local function getIP()
-    local response = request({
-        Url = "https://api.ipify.org?format=json",
-        Method = "GET"
-    })
-    
-    if response.Success then
-        local json = game:GetService("HttpService"):JSONDecode(response.Body)
-        return json.ip or "Unknown IP"
-    else
-        return "Failed to fetch IP: " .. tostring(response.StatusCode)
-    end
-end
-
-local executorName, executorVersion = identifyexecutor() or "Unknown Executor", "Unknown Version"
-
-local playerName = game.Players.LocalPlayer.Name
-local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-local hwid = getHWID()
-local ip = playerName == "asdsa12424" or playerName == "sagazFPS" and "Hidden" or getIP()
-
-local payload = {
-    ["content"] = nil,
-    ["embeds"] = {{
-        ["title"] = "Script Execution Log",
-        ["color"] = 16711680,
-        ["fields"] = {
-            {["name"] = "Player Name", ["value"] = playerName, ["inline"] = true},
-            {["name"] = "Game", ["value"] = gameName, ["inline"] = true},
-            {["name"] = "Executor", ["value"] = executorName .. " (v" .. executorVersion .. ")", ["inline"] = true},
-            {["name"] = "HWID", ["value"] = hwid, ["inline"] = true},
-            {["name"] = "IP Address", ["value"] = ip, ["inline"] = true}
-        },
-        ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
-    }}
-}
-
-local httpService = game:GetService("HttpService")
-local requestData = {
-    Url = webhookUrl,
-    Method = "POST",
-    Headers = {
-        ["Content-Type"] = "application/json"
-    },
-    Body = httpService:JSONEncode(payload)
-}
-
-local success, response = pcall(function()
-    return request(requestData)
-end)
-
-if success and response.Success then
-    print("Data sent to Discord webhook successfully")
-else
-    warn("Failed to send data to webhook: " .. (response and response.StatusCode or "Request error"))
-end
