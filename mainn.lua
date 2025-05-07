@@ -51,6 +51,7 @@ local Tabs = {
     fun = Window:AddTab({ Title = "Fun", Icon = "star" }),
     esp = Window:AddTab({ Title = "ESP", Icon = "eye" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+    AutoFarm = Window:AddTab({ Title = "AutoFarm", Icon = "dollar-sign" }),
     Status = Window:AddTab({ Title = "Status", Icon = "signal" })
 }
 
@@ -61,7 +62,7 @@ Tabs.Status:AddParagraph({
 })
 Tabs.Status:AddParagraph({
     Title = "Script Version",
-    Content = "0.2.1"
+    Content = "0.2.2"
 })
 Tabs.Status:AddParagraph({
     Title = "Executor",
@@ -550,7 +551,7 @@ Tabs.fun:AddSlider('ModifyCurve', {
 Tabs.fun:AddSlider('ModifyBackSpin', {
     Title = 'Modify Back Spin',
     Description = 'Change the back spin of the ball',
-    Default = 1,
+    Default = 0,
     Min = 0.5,
     Max = 10,
     Rounding = 2,
@@ -558,7 +559,87 @@ Tabs.fun:AddSlider('ModifyBackSpin', {
         game:GetService("ReplicatedStorage").Values.BackSpin.Value = value
     end
 })
+local autoFarmEnabled = false
+local autoKeyEnabled = false
 
+local function getGoalZone()
+    local Teams = game:GetService("Teams")
+    local paths = {
+        Away = workspace.BallZones.AwayGoalZone,
+        Home = workspace.BallZones.HomeGoalZone
+    }
+    if player.Team == Teams["Away FC"] then
+        return paths.Home
+    elseif player.Team == Teams["Home FC"] then
+        return paths.Away
+    end
+end
+
+local function teleportToBall()
+    local ball = workspace:WaitForChild("Balls"):WaitForChild("TPS")
+    if ball and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = ball.CFrame * CFrame.new(0, 2, 0)
+    end
+end
+
+local function shootBall()
+    local shootTool = player.Backpack:FindFirstChild("Dribble")
+    if shootTool then
+        player.Character.Humanoid:EquipTool(shootTool)
+    end
+end
+
+local function teleportBallToGoal()
+    local ball = workspace:WaitForChild("Balls"):WaitForChild("TPS")
+    local goalZone = getGoalZone()
+    if ball and goalZone then
+        ball.CFrame = goalZone.CFrame * CFrame.new(0, 5, 0)
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoFarmEnabled then
+            local ball = workspace:WaitForChild("Balls"):WaitForChild("TPS")
+            local networkOwner = ball:WaitForChild("NetworkOwner")
+            if tostring(networkOwner.Value) == player.Name then
+                teleportBallToGoal()
+            else
+                teleportToBall()
+                shootBall()
+            end
+        end
+        wait(0.1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if autoKeyEnabled then
+            local VirtualInputManager = game:GetService("VirtualInputManager")
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+            wait(0.05)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+        end
+        wait()
+    end
+end)
+
+Tabs.AutoFarm:AddToggle("AutoFarmToggle", {
+    Title = "Enable AutoFarm",
+    Default = false,
+    Callback = function(Value)
+        autoFarmEnabled = Value
+    end
+})
+
+Tabs.AutoFarm:AddToggle("AutoKeyToggle", {
+    Title = "Enable AutoKey",
+    Default = false,
+    Callback = function(Value)
+        autoKeyEnabled = Value
+    end
+})
 Workspace.DescendantAdded:Connect(function(descendant)
     if Options.BoxHandleToggle.Value and descendant:IsA("Part") and descendant.Name == "TPS" and not boxHandles[descendant] then
         local boxHandle = Instance.new("BoxHandleAdornment")
@@ -595,8 +676,8 @@ SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
+InterfaceManager:SetFolder("spjreach")
+SaveManager:SetFolder("spjreach/mpsfutsal")
 InterfaceManager:BuildInterfaceSection(Tabs.Customization)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
