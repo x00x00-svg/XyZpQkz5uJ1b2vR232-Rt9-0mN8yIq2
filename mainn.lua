@@ -577,6 +577,155 @@ Tabs.AutoFarm:AddToggle("AutoKeyToggle", {
 })
 
 
+local camera = workspace.CurrentCamera
+
+_G.TPSBallSpeed = 200
+
+local BALL_FOLDER = workspace:WaitForChild("Balls")
+local BALL_NAME_PREFIX = "TPS"
+
+local ContextActionService = game:GetService("ContextActionService")
+
+local camera = workspace.CurrentCamera
+
+local controlling = false
+local currentBall = nil
+local moveInput = {
+	forward = false,
+	left = false,
+	right = false,
+	up = false,
+	down = false
+}
+
+local function getTPSBall()
+	for _, obj in ipairs(BALL_FOLDER:GetChildren()) do
+		if obj:IsA("BasePart") and obj.Name:sub(1, #BALL_NAME_PREFIX) == BALL_NAME_PREFIX then
+			return obj
+		end
+	end
+	return nil
+end
+
+local function onMoveAction(actionName, inputState, input)
+	if not controlling then return Enum.ContextActionResult.Pass end
+
+	local isPressed = inputState == Enum.UserInputState.Begin
+	local key = input.KeyCode
+
+	if key == Enum.KeyCode.W then moveInput.forward = isPressed end
+	if key == Enum.KeyCode.A then moveInput.left = isPressed end
+	if key == Enum.KeyCode.S then moveInput.backward = isPressed end
+	if key == Enum.KeyCode.D then moveInput.right = isPressed end
+	if key == Enum.KeyCode.Space then moveInput.up = isPressed end
+	if key == Enum.KeyCode.LeftShift then moveInput.down = isPressed end
+
+	return Enum.ContextActionResult.Sink
+end
+
+local function bindBallControls()
+	ContextActionService:BindAction("TPSBallMovement", onMoveAction, false,
+		Enum.KeyCode.W, Enum.KeyCode.A, Enum.KeyCode.S, Enum.KeyCode.D,
+		Enum.KeyCode.Space, Enum.KeyCode.LeftShift)
+end
+
+local function unbindBallControls()
+	ContextActionService:UnbindAction("TPSBallMovement")
+end
+
+local function startControlling(ball)
+	currentBall = ball
+	camera.CameraSubject = ball
+	camera.CameraType = Enum.CameraType.Custom
+	controlling = true
+	bindBallControls()
+end
+
+local function stopControlling()
+	camera.CameraSubject = player.Character:FindFirstChild("Humanoid") or player.Character:FindFirstChildWhichIsA("BasePart")
+	camera.CameraType = Enum.CameraType.Custom
+	currentBall = nil
+	controlling = false
+	unbindBallControls()
+end
+
+RunService.RenderStepped:Connect(function()
+	if not controlling or not currentBall then return end
+
+	local camCF = camera.CFrame
+	local moveDir = Vector3.zero
+
+	if moveInput.forward then moveDir += camCF.LookVector end
+	if moveInput.backward then moveDir -= camCF.LookVector end
+	if moveInput.left then moveDir -= camCF.RightVector end
+	if moveInput.right then moveDir += camCF.RightVector end
+	if moveInput.up then moveDir += Vector3.new(0, 1, 0) end
+	if moveInput.down then moveDir -= Vector3.new(0, 1, 0) end
+
+	if moveDir.Magnitude > 0 then
+		moveDir = moveDir.Unit * math.clamp(_G.TPSBallSpeed or 0, 0, 300)
+		currentBall.Velocity = moveDir
+	else
+		currentBall.Velocity *= 0.9
+	end
+end)
+
+-- === UI Integration ===
+Tabs.fun:AddToggle("ControlBallToggle", {
+	Title = "Enable Ball Control",
+	Description = "Toggle free-fly control of the TPS ball",
+	Default = false,
+	Callback = function(state)
+		if state then
+			local ball = getTPSBall()
+			if ball then
+				startControlling(ball)
+			else
+				warn("No TPS ball found!")
+			end
+		else
+			stopControlling()
+		end
+	end
+})
+
+Tabs.fun:AddSlider("BallSpeedSlider", {
+	Title = "Control Speed",
+	Description = "Set your ball fly speed (0–300)",
+	Default = _G.TPSBallSpeed,
+	Min = 0,
+	Max = 300,
+	Rounding = 0,
+	Callback = function(value)
+		_G.TPSBallSpeed = value
+	end
+})
+
+local Keybind = Tabs.fun:AddKeybind("BallControlKeybind", {
+    Title = "Toggle Ball Control (Keybind)",
+    Mode = "Toggle", 
+    Default = "U",
+
+    Callback = function(state)
+
+        if state then
+            local ball = getTPSBall()
+            if ball then
+                startControlling(ball)
+            else
+                warn("No TPS ball found!")
+            end
+        else
+            stopControlling()
+        end
+
+        Options.ControlBallToggle:SetValue(state)
+    end,
+
+    ChangedCallback = function(newKey)
+        
+    end
+})
 
 
 task.spawn(function()
