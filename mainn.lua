@@ -461,72 +461,6 @@ task.spawn(function()
     end
 end)
 
-
-local boxHandles = {}
-Tabs.Main:AddToggle("BoxHandleToggle", {
-    Title = "Enable TPS Box Handles",
-    Description = "Shows BoxHandleAdornments for TPS balls",
-    Default = false,
-    Callback = function(state)
-        if state then
-            for _, ball in pairs(Workspace:GetDescendants()) do
-                if ball:IsA("Part") and ball.Name == "TPS" and not boxHandles[ball] then
-                    local boxHandle = Instance.new("BoxHandleAdornment")
-                    boxHandle.Name = "TPSBoxHandle"
-                    boxHandle.Parent = ball
-                    boxHandle.Adornee = ball
-                    boxHandle.Size = Vector3.new(1, 1, 1) -- Default size
-                    boxHandle.Color3 = Color3.fromRGB(255, 0, 0)
-                    boxHandle.Transparency = 0.5
-                    boxHandle.AlwaysOnTop = true
-                    boxHandles[ball] = boxHandle
-                end
-            end
-        else
-            for ball, boxHandle in pairs(boxHandles) do
-                if boxHandle then
-                    boxHandle:Destroy()
-                end
-            end
-            table.clear(boxHandles)
-        end
-        Fluent:Notify({
-            Title = "TPS Box Handles",
-            Content = state and "Box Handles Enabled" or "Box Handles Disabled",
-            Duration = 3
-        })
-    end
-})
-
-
-local function updateBoxHandleSize(value)
-	for _, ball in pairs(Workspace:GetDescendants()) do
-		if ball:IsA("Part") and ball.Name == "TPS" then
-			ball.Size = Vector3.new(value, value, value)
-			local boxHandle = ball:FindFirstChild("TPSBoxHandle")
-			if boxHandle and boxHandle:IsA("BoxHandleAdornment") then
-				boxHandle.Size = ball.Size
-			end
-		end
-	end
-end
-
-Tabs.Main:AddSlider("BoxHandleSizeSliderOnly", {
-    Title = "Ball Hitbox",
-    Description = "Resize the ball hitbox",
-    Default = 1,
-    Min = 0.5,
-    Max = 5,
-    Rounding = 2,
-    Callback = function(value)
-        updateBoxHandleSize(value)
-        Fluent:Notify({
-            Title = "Size Updated",
-            Content = "Ball and BoxHandle size: " .. value,
-            Duration = 3
-        })
-    end
-})
 Tabs.fun:AddSlider("BoxHandleSizeSlider", {
     Title = "Changed cooldown of dribble",
     Description = "Adjust cooldown of dribble",
@@ -641,26 +575,9 @@ Tabs.AutoFarm:AddToggle("AutoKeyToggle", {
         autoKeyEnabled = Value
     end
 })
-Workspace.DescendantAdded:Connect(function(descendant)
-    if Options.BoxHandleToggle.Value and descendant:IsA("Part") and descendant.Name == "TPS" and not boxHandles[descendant] then
-        local boxHandle = Instance.new("BoxHandleAdornment")
-        boxHandle.Name = "TPSBoxHandle"
-        boxHandle.Parent = descendant
-        boxHandle.Adornee = descendant
-        boxHandle.Size = Vector3.new(Options.BoxHandleSizeSlider.Value, Options.BoxHandleSizeSlider.Value, Options.BoxHandleSizeSlider.Value)
-        boxHandle.Color3 = Color3.fromRGB(255, 0, 0)
-        boxHandle.Transparency = 0.5
-        boxHandle.AlwaysOnTop = true
-        boxHandles[descendant] = boxHandle
-    end
-end)
 
-Workspace.DescendantRemoving:Connect(function(descendant)
-    if boxHandles[descendant] then
-        boxHandles[descendant]:Destroy()
-        boxHandles[descendant] = nil
-    end
-end)
+
+
 
 task.spawn(function()
     while true do
@@ -783,4 +700,3 @@ end)
 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
     createReachCircle()
 end
-
