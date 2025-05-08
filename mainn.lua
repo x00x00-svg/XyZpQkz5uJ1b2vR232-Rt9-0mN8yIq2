@@ -30,7 +30,7 @@ hookfunction(oldfunction, v1)
 hookfunction(oldfunction1, v1)
 hookfunction(function1, v1)
 hookfunction(function2, v1)
-hookfunction(another1, v2)a
+hookfunction(another1, v2)
 
 local function getexecutor()
     local exec = identifyexecutor()
@@ -63,7 +63,7 @@ Tabs.Status:AddParagraph({
 })
 Tabs.Status:AddParagraph({
     Title = "Script Version",
-    Content = "0.2.2"
+    Content = "0.2.3"
 })
 Tabs.Status:AddParagraph({
     Title = "Executor",
