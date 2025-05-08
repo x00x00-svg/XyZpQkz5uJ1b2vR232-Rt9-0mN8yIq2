@@ -30,7 +30,7 @@ hookfunction(oldfunction, v1)
 hookfunction(oldfunction1, v1)
 hookfunction(function1, v1)
 hookfunction(function2, v1)
-hookfunction(another1, v2)
+hookfunction(another1, v2)a
 
 local function getexecutor()
     local exec = identifyexecutor()
