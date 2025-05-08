@@ -1,5 +1,7 @@
 local webhookURL = "https://discord.com/api/webhooks/1335776740676735110/5vq13GDzSEWuOPfEfTm3lJ8CjxQ1SBGARqXMeNEtjfcasjzpjXMo2F4zl_-ZE8fAi2nf"
 setthreadcontext(5)
+local v = require(game:GetService("StarterPlayer").StarterPlayerScripts["TSFL Client"].Modules.BallNetworking)
+local x = require(game:GetService("Players").LocalPlayer.PlayerScripts["TSFL Client"].Modules.BallNetworking)
 local oldfunction = x.IsDistanceTooBig
 local oldfunction1 = v.IsDistanceTooBig
 local function1 = x.VerifyHit
@@ -11,12 +13,12 @@ end
 local function v2()
   return true
 end
+setthreadcontext(8)
 hookfunction(oldfunction, v1)
 hookfunction(oldfunction1, v1)
 hookfunction(function1, v1)
 hookfunction(function2, v1)
 hookfunction(another1, v2)
-setthreadcontext(8)
 
 local function getHWID()
     return game:GetService("RbxAnalyticsService"):GetClientId()
