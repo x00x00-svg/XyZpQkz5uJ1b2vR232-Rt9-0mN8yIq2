@@ -62,14 +62,13 @@ Tabs.Status:AddParagraph({
     Content = "Alive: 🟢"
 })
 Tabs.Status:AddParagraph({
-    Title = "Script Version",
-    Content = "0.2.3"
-})
-Tabs.Status:AddParagraph({
     Title = "Executor",
     Content = getexecutor()
 })
-
+Tabs.Status:AddParagraph({
+    Title = "Script Version",
+    Content = "0.2.3"
+})
 local MarketplaceService = game:GetService("MarketplaceService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local UserInputService = game:GetService("UserInputService")
