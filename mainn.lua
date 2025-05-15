@@ -20,6 +20,7 @@ local oldfunction1 = v.IsDistanceTooBig
 local function1 = x.VerifyHit
 local function2 = v.VerifyHit
 local another1 = x.IsBallBoundingHitbox
+local another2 = x.IsBallBoundingHitbox
 local function v1()
   return false
 end
@@ -31,6 +32,7 @@ hookfunction(oldfunction1, v1)
 hookfunction(function1, v1)
 hookfunction(function2, v1)
 hookfunction(another1, v2)
+hookfunction(another2, v2)
 setthreadcontext(8)
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/x00x00-svg/XyZpQkz5uJ1b2vR232-Rt9-0mN8yIq2/refs/heads/main/maybe.luau'))()
